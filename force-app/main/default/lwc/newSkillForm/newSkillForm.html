@@ -1,0 +1,34 @@
+<template>
+    <lightning-card title={title} icon-name="standard:record">
+        <template if:true={ready}>
+            <div class="slds-p-horizontal_large slds-p-top_medium">
+                <lightning-record-edit-form
+                    object-api-name={objectApiName}
+                    record-type-id={recordTypeId}
+                    onsuccess={handleSuccess}
+                    onerror={handleError}
+                    onsubmit={handleSubmit}
+                    density="comfy">
+
+                    <lightning-messages></lightning-messages>
+
+                    <!-- Dynamically render the rest of the Skill object fields -->
+                    <template for:each={fields} for:item="fld">
+                        <lightning-input-field key={fld.apiName} field-name={fld.apiName} required={fld.isRequired} ></lightning-input-field>
+                    </template>
+
+                    <div class="slds-m-top_medium slds-align_absolute-center slds-button-group" role="group">
+                        <lightning-button variant="neutral" label="Cancel" onclick={handleCancel}></lightning-button>
+                        <lightning-button class="slds-m-left_small" variant="brand" type="submit" label="Save"></lightning-button>
+                    </div>
+                </lightning-record-edit-form>
+            </div>
+        </template>
+
+        <template if:false={ready}>
+            <div class="slds-p-around_large slds-align_absolute-center">
+                <lightning-spinner size="medium"></lightning-spinner>
+            </div>
+        </template>
+    </lightning-card>
+</template>
