@@ -1,6 +1,7 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { getRecordCreateDefaults } from 'lightning/uiRecordApi';
+import { CurrentPageReference } from 'lightning/navigation';
 import {
   IsConsoleNavigation,
   getFocusedTabInfo,
@@ -11,57 +12,61 @@ import {
 export default class NewRecordForm extends NavigationMixin(LightningElement) {
     
     @api objectApiName;
+    @api recordTypeId;
 
-    recordTypeId;
     defaults = {};
 
     @track fields = [];
     ready = false;
+    retrievalErrorMsg;
 
     get title() {
         return 'New ' + this.objectApiName;
     }
 
+    @wire(CurrentPageReference)
+    getUrlParameters(pageRef) {
+        if (!pageRef) return;
+
+        // Extract Record Type Id from the URL
+        this.recordTypeId = pageRef.state.recordTypeId;
+    }   
+
     @wire(getRecordCreateDefaults, { objectApiName: '$objectApiName', recordTypeId: '$recordTypeId' })
     wiredDefaults({ data, error }) {
-        console.log('Running wired method');
         if (data) {
-            console.log('Data => ', JSON.stringify(data, null, 2));
-            // Extract editable field API names from the layout
+            // Extract editable field API names from the appropriate page layout
             const fieldData = [];
+            // Page layout section
             (data?.layout?.sections || []).forEach(section => {
+                // Page layout row
                 (section.layoutRows || []).forEach(row => {
+                    // Individual field
                     (row.layoutItems || []).forEach(item => {
-                        // Exctract nested info from layout components
-                        let apiName;
+                        // Nested field data
                         (item.layoutComponents || []).forEach(comp => {
                             if (comp.apiName && item.editableForNew) {
-                                apiName = comp.apiName;
+                                fieldData.push({
+                                    apiName: comp.apiName,
+                                    isRequired: item.required ?? false
+                                });
                             }
                         });
-
-                        // Add field data to collection
-                        if(apiName) {
-                            fieldData.push({
-                                apiName: apiName,
-                                isRequired: item.required ?? false
-                            });
-                        }
                     });
                 });
             });
 
-            // De-duplicate and keep something sensible if layout is empty
-            const uniq = Array.from(new Set(fieldData));
-            this.fields = uniq.length ? uniq : ['Name']; // fallback
-            console.log('Fields =>', JSON.stringify(this.fields));
-            this.ready = true;
+            // De-duplicate and only show edit form if there are editable fields
+            this.fields = Array.from(new Set(fieldData));
+            if(this.fields) {
+                this.ready = true;
+            } else {
+                this.retrievalErrorMsg = 'There are no editable fields for this form. Please contact your admin for assistance.';
+            }
         } else if (error) {
-            // If layout fetch fails, fall back to a minimal form
-            // eslint-disable-next-line no-console
+            // Surface error message if layout fetch fails
             console.warn('getRecordCreateDefaults error', error);
-            this.fields = ['Name'];
-            this.ready = true;
+            this.retrievalErrorMsg = 'There was an error retrieving the editable fields for this form. Please contact your admin for assistance.';
         }
     }
 

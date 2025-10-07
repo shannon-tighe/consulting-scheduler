@@ -1,0 +1,29 @@
+<template>
+    <!-- Contact Selector -->
+    <lightning-card title="New Appointment" icon-name="standard:record">
+        <lightning-record-edit-form
+            object-api-name="Appointment__c"
+            record-type-id={recordTypeId}>
+        
+            <lightning-messages></lightning-messages>
+
+            <lightning-input-field class="contact-lookup" value={contactId} field-name="Contact__c" onchange={handleContactChange} ></lightning-input-field>
+        
+        </lightning-record-edit-form>
+
+        <template if:true={contactIsSelected} >
+            <!-- Render Contacts Skills -->
+            <lightning-datatable
+                data={contactSkills}
+                columns={contactSkillCols}
+                key-field="Id"
+                onrowselection={handleRowSelection}
+                draft-values={draftValues}
+                oncellchange={handleCellChange}
+                onsave={handleSave}
+                oncancel={handleCancel}
+            ></lightning-datatable>
+        </template>
+
+    </lightning-card>
+</template>

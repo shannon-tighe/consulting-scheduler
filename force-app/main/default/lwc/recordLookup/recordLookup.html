@@ -1,0 +1,26 @@
+<template>
+    <template if:true={objectApiName} >
+        <div class="slds-p-around_medium">
+
+            <lightning-record-picker
+                class="lookup"
+                label={label}
+                placeholder={placeholder}
+                object-api-name={objectApiName}
+                value={selectedRecordId}
+                required={required}
+                disabled={disabled}
+                read-only={readOnly}
+                variant={variant}
+                matching-info={matchingInfo}
+                display-info={displayInfo}
+                filter={filter}
+                onchange={handleChange}>
+            </lightning-record-picker>
+
+        </div>
+    </template>
+    <template if:false={objectApiName} >
+        <p>No Object was specified for the record lookup. Please contact your administrator.</p>
+    </template>
+</template>

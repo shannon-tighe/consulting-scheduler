@@ -1,0 +1,3 @@
+<aura:component implements="lightning:actionOverride,lightning:isUrlAddressable" access="global">
+    <c:newAppointmentForm></c:newAppointmentForm>
+</aura:component>

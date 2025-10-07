@@ -1,0 +1,29 @@
+<template>
+  <lightning-card title={title} icon-name="standard:record">
+    <div class="slds-p-around_medium">
+
+      <template if:true={hasObjectInfo}>
+        <lightning-combobox
+          name="rt"
+          label="Record Type"
+          placeholder="Select a record type"
+          value={selectedRecordTypeId}
+          options={recordTypeOptions}
+          onchange={handleRtChange}>
+        </lightning-combobox>
+
+        <template if:true={selectedRecordTypeId}>
+            <c-new-skill-form
+                object-api-name={objectApiName}
+                record-type-id={selectedRecordTypeId}>
+            </c-new-skill-form>
+        </template>
+      </template>
+
+      <template if:false={hasObjectInfo}>
+        <lightning-spinner size="small"></lightning-spinner>
+      </template>
+
+    </div>
+  </lightning-card>
+</template>
