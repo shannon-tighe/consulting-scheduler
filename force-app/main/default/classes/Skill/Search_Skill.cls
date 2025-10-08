@@ -6,6 +6,13 @@
  * @see DTO_Skill
  */
 public with sharing class Search_Skill {
+    private final TxnContext ctx;
+
+    /**
+     * @description Constructs a search service bound to a transaction context.
+     * @param ctx Transaction context (cache, corrId).
+     */
+    public Search_Skill(TxnContext ctx) { this.ctx = ctx; }
 
     /**
      * @description Allowed sort orders for search results.
@@ -34,7 +41,7 @@ public with sharing class Search_Skill {
     public class PageRequest {
         /** @description Page size; clamped to [1..200]. */
         public Integer size = 50;
-        /** @description Cursor token from previous page; format depends on sort order. */
+        /** @description Cursor token from previous page; format depends on sortOrder. */
         public String afterKey;
     }
 
@@ -57,7 +64,7 @@ public with sharing class Search_Skill {
      * @return PageCore containing items and nextKey.
      * @since 1.0.0
      */
-    public static PageCore searchCore(SkillCriteria criteria, PageRequest page, SkillSort sortOrder) {
+    public PageCore searchCore(SkillCriteria criteria, PageRequest page, SkillSort sortOrder) {
         // 1) Validate inputs and clamp page size
         SkillCriteria c = (criteria == null) ? new SkillCriteria() : criteria; c.validate();
         PageRequest p = (page == null) ? new PageRequest() : page;
@@ -65,14 +72,10 @@ public with sharing class Search_Skill {
 
         // 2) Build base SELECT/WHERE
         String soql = 'SELECT Id, Name, LastModifiedDate FROM Skill__c WHERE 1=1';
-
-        // Pre-bind LIKE term (avoid injecting expressions into query text)
         if (!String.isBlank(c.nameLike)) {
             String likeTerm = '%' + c.nameLike + '%';
             soql += ' AND Name LIKE :likeTerm';
         }
-
-        // Enforce FLS/CRUD at query-time
         soql += ' WITH SECURITY_ENFORCED';
 
         // 3) Apply keyset cursor and ORDER BY
@@ -104,9 +107,7 @@ public with sharing class Search_Skill {
         // 5) Map to DTOs and compute nextKey (only if a full page was returned)
         PageCore pageOut = new PageCore();
         pageOut.items = new List<DTO_Skill.RowCore>();
-        for (Skill__c s : rows) {
-            pageOut.items.add(new DTO_Skill.RowCore(s.Id, s.Name));
-        }
+        for (Skill__c s : rows) pageOut.items.add(new DTO_Skill.RowCore(s.Id, s.Name));
         if (rows.size() == p.size) {
             Skill__c tail = rows[rows.size() - 1];
             pageOut.nextKey = (sortOrder == SkillSort.NAME_ASC)

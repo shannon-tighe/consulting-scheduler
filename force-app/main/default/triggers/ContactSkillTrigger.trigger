@@ -12,12 +12,12 @@ trigger ContactSkillTrigger on ContactSkill__c (
 ) {
     if (Trigger.isBefore) {
         if (Trigger.isInsert) Orchestrator_ContactSkill.beforeInsert(Trigger.new);
-        if (Trigger.isUpdate) Orchestrator_ContactSkill.beforeUpdate(Trigger.new, Trigger.oldMap);
-        if (Trigger.isDelete) Orchestrator_ContactSkill.beforeDelete(Trigger.old);
+        if (Trigger.isUpdate) Orchestrator_ContactSkill.beforeUpdate(Trigger.new, Trigger.oldMap, Trigger.newMap);
+        if (Trigger.isDelete) Orchestrator_ContactSkill.beforeDelete(Trigger.old, Trigger.oldMap);
     } else {
-        if (Trigger.isInsert)   Orchestrator_ContactSkill.afterInsert(Trigger.new);
-        if (Trigger.isUpdate)   Orchestrator_ContactSkill.afterUpdate(Trigger.new, Trigger.oldMap);
-        if (Trigger.isDelete)   Orchestrator_ContactSkill.afterDelete(Trigger.old);
-        if (Trigger.isUndelete) Orchestrator_ContactSkill.afterUndelete(Trigger.new);
+        if (Trigger.isInsert)   Orchestrator_ContactSkill.afterInsert(Trigger.new, Trigger.newMap);
+        if (Trigger.isUpdate)   Orchestrator_ContactSkill.afterUpdate(Trigger.new, Trigger.oldMap, Trigger.newMap);
+        if (Trigger.isDelete)   Orchestrator_ContactSkill.afterDelete(Trigger.old, Trigger.oldMap);
+        if (Trigger.isUndelete) Orchestrator_ContactSkill.afterUndelete(Trigger.new, Trigger.newMap);
     }
 }
